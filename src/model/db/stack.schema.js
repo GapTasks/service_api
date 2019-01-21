@@ -7,7 +7,8 @@ const Stack = new mongoose.Schema({
     priority: { type: Number, required: true }
 });
 
+mongoose.model('Stack', Stack)
+
 module.exports = {
-    Stack,
-    StackModel: mongoose.model('Stack', Stack)
+    Stack
 };

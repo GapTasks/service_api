@@ -9,7 +9,8 @@ const Task = new mongoose.Schema({
     stack: { type: String, required: true }
 });
 
+mongoose.model('Task', Task);
+
 module.exports = {
-    Task,
-    TaskModel: mongoose.model('Task', Task)
+    Task
 }

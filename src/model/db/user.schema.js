@@ -7,7 +7,8 @@ const User = new mongoose.Schema({
     stacks: { type: [String], required: false, default: [] }
 });
 
+mongoose.model('User', User)
+
 module.exports = {
-    User,
-    UserModel: mongoose.model('User', User)
+    User
 }

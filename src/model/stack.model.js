@@ -1,9 +1,16 @@
-const db = require('./db/stack.schema').StackModel;
 const shortid = require('shortid');
+const mongoose = require('mongoose');
+require('./db/stack.schema')
+const db = mongoose.model('Stack');
+
 
 class Stack {
-    constructor(props) {
-        this.id = props.id || props._id || shortid.generate();
+    constructor(props, allowId = true) {
+        if(allowId) {
+            this.id = props.id || props._id || shortid.generate();
+        } else {
+            this.id = shortid.generate();
+        }
         this.name = props.name || null;
         this.deadline = props.deadline || Date.now();
         this.priority = props.priority || 0;
