@@ -1,20 +1,23 @@
 const express = require('express');
+const stacksApi = require('./stacks.routes');
+const httpStatus = require('http-status');
 const bodyParser = require('body-parser');
-const apiRouter = express.Router();
-const users = require('./users.routes');
-const auth = require('./auth.routes');
-
-apiRouter.use(bodyParser.json());
-apiRouter.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE');
-    next();
-});
 
 let prefix = '/api/v1';
+let api = express.Router();
 
-apiRouter.use(prefix, auth);
-apiRouter.use(prefix, users);
+api.use(bodyParser.json());
 
-module.exports = apiRouter;
+api.use(prefix, stacksApi);
+
+api.use((req, res) => {
+    return res.status(httpStatus.BAD_REQUEST).json({
+        api: 'v1',
+        success: false,
+        status: 'BAD_REQUEST',
+        message: 'Bad request',
+        content: {}
+    });
+});
+
+module.exports = api;
