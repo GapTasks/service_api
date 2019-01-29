@@ -1,4 +1,6 @@
-const db = require('./db/task.schema').TaskModel;
+const mongoose = require('mongoose');
+require('./db/task.schema');
+const db = mongoose.model('Task');
 const shortid = require('shortid');
 
 class Task {

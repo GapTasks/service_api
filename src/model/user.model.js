@@ -1,8 +1,11 @@
-const db = require('./db/user.schema').UserModel;
+const shortid = require('shortid');
+const mongoose = require('mongoose');
+require('./db/user.schema')
+const db = mongoose.model('User');
 
 class User {
     constructor(props) {
-        this.username = props.username || props.id || props._id || null;
+        this.username = props.username || props.id || props._id || shortid.generate();
         this.name = props.name || null;
         this.email = props.email || null;
         this.stacks = props.stacks || [];
