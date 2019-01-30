@@ -32,7 +32,7 @@ async function login(req, res) {
                 `Could not find user with username '${req.body.username}'`
             );
         let authInfo = await AuthModel.find({ user: user.id });
-        if (!authInfo) return response.sendErrorResponse(res, status.NOT_FOUND, 'Failed to authenticate user');
+        if (!authInfo) return response.sendErrorResponse(res, status.NOT_FOUND, 'Could not autheticate the user');
         let hashed = hash(authInfo.algo, authInfo.salt, req.body.password);
         if (hashed != authInfo.hash) {
             return response.sendErrorResponse(
@@ -44,10 +44,10 @@ async function login(req, res) {
         // Authentication succeeded, generate a token and return it to the user
         let token = await authToken.generate(req.body.username);
         res.cookie('auth', token);
-        return response.sendActionResponse(res, status.OK, 'Successfully authenticated user', { token });
+        return response.sendOkResponse(res, status.OK, 'Successfully authenticated user', { token });
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(res, err, 'authenticate user');
+        return response.sendErrorResponse(res, status.INTERNAL_SERVER_ERROR, 'Failed to authenticate user');
     }
 }
 
