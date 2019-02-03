@@ -1,7 +1,12 @@
 const UserModel = require('../../model/user.model');
+const AuthModel = require('../../model/auth.model');
+const { hash } = require('./auth.handlers');
 const response = require('./response');
 const status = require('http-status');
 const logger = require('winstonson')(module);
+const crypto = require('crypto');
+const config = require('config');
+const _config = config.get('security');
 
 module.exports = {
     getUser,
@@ -18,20 +23,38 @@ function generateResourceUrl(user) {
 function prepUserResponse(user) {
     let self = generateResourceUrl(user);
     user._links = {
-        self
+        self,
+        tasks: self + '/tasks',
+        goals: self + '/goals',
+        objectives: self + '/objectives'
     };
 }
 
 async function addNewUser(req, res) {
     try {
+        if(!req.body.username || !req.body.password){
+            return response.sendErrorResponse(res, status.BAD_REQUEST, 'Missing username and/or password');
+        }
+        logger.trace('Verifying user does not already exist');
+        let user = await UserModel.find({ username: req.body.username });
+        if( user !== undefined) {
+            return response.sendOkResponse(res, status.OK, 'User already exists', user);
+        }
         logger.trace('Adding new user with username ' + req.body.username);
-        let user = await UserModel.merge(new UserModel.User(req.body));
-        logger.trace('Added user. Preparing and sending response');
+        user = new UserModel.User(req.body);
+        user.lastLogin = Date.now();
+        user = await UserModel.merge(user);
+        logger.trace('Added user. Generating authentication entry');
+        let salt = crypto.randomBytes(8).toString('hex');
+        let algo = _config.hashAlgo;
+        let h = hash(algo, salt, req.body.password);
+        await AuthModel.merge(new AuthModel.AuthInfo({ user: user.id, salt, algo, hash: h }));
+        logger.trace('Authentication entry added. Preparing response');
         prepUserResponse(user);
-        return response.sendActionResponse(res, status.CREATED, 'Successfully created new user', user);
+        return response.sendOkResponse(res, status.CREATED, 'Successfully created new user', user);
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(res, err, 'add new user');
+        return response.sendErrorResponse(res, status.INTERNAL_SERVER_ERROR, 'Failed to create a new user');
     }
 }
 
@@ -40,10 +63,10 @@ async function getUser(req, res) {
         logger.trace('Retrieving user');
         let user = await UserModel.find({ id: req.params.id });
         prepUserResponse(user);
-        return response.sendQueryResponse(res, status.OK, user);
+        return response.sendOkResponse(res, status.OK, 'Successfully found user', user);
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(res, err, 'retrieve user');
+        return response.sendErrorResponse(res, status.INTERNAL_SERVER_ERROR, 'Failed to retrieve user');
     }
 }
 
@@ -54,9 +77,9 @@ async function updateUser(req, res) {
         let updatedUser = await UserModel.merge(req.body);
         logger.trace('User updated. Preparing and sending response');
         prepUserResponse(updatedUser);
-        return response.sendActionResponse(res, status.OK, 'Successfully saved user', updatedUser);
+        return response.sendOkResponse(res, status.OK, 'Successfully saved user', updatedUser);
     } catch (err) {
-        return response.sendErrorResponse(res, err, 'save user');
+        return response.sendErrorResponse(res, status.INTERNAL_SERVER_ERROR, 'Failed to update user');
     }
 }
 
@@ -66,12 +89,12 @@ async function deleteUser(req, res) {
         let removed = await UserModel.remove({ id: req.params.id });
         if (!removed) {
             logger.warn('Failed to remove user: could not find user with id ' + req.params.id);
-            return response.sendActionResponse(res, status.NOT_FOUND, 'Failed to find user to remove');
+            return response.sendOkResponse(res, status.NOT_FOUND, 'Failed to find user to remove');
         }
         logger.trace('Removed user');
-        return response.sendActionResponse(res, status.OK, 'Successfully removed user');
+        return response.sendOkResponse(res, status.OK, 'Successfully removed user');
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(res, err, 'remove user');
+        return response.sendErrorResponse(res, status.INTERNAL_SERVER_ERROR, 'Failed to remove user');
     }
 }

@@ -21,62 +21,46 @@ function generateRestRsponse(stack) {
 }
 
 async function addStack(req, res) {
-    logger.trace('entering stacks.handlers#addStack()');
-    let action = 'create stack';
     try {
         let newStack = new stacks.Stack(req.body, false);
         await stacks.merge(newStack);
         let resBody = generateRestRsponse(newStack);
-        return response.sendOkResponse(action, res, httpStatus.CREATED, resBody);
+        return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new stack', resBody);
     } catch (err) {
         logger.error(err);
-        response.sendErrorResponse(action, res, err);
-    } finally {
-        logger.trace('exiting stacks.handlers#addStack()');
+        response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create stack');
     }
 }
 
 async function getStack(req, res) {
-    logger.trace('entering stacks.handlers#getStack()');
-    let action = 'retrieve stack';
     try {
         let stack = await stacks.find({ id: req.params.id });
         let resBody = generateRestRsponse(stack);
-        return response.sendOkResponse(action, res, httpStatus.OK, resBody);
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stack', resBody);
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(action, res, err);
-    } finally {
-        logger.trace('exiting stacks.handlers#getStack()');
+        return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get stack');
     }
 }
 
 async function updateStack(req, res) {
-    logger.trace('entering stacks.handlers#updateStack()');
-    let action = 'update stack';
     try {
         req.body.id = req.params.id;
         let stack = await stacks.merge(req.body);
         let resBody = generateRestRsponse(stack);
-        return response.sendOkResponse(action, res, httpStatus.OK, resBody);
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully updated stack', resBody);
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(action, res, err);
-    } finally {
-        logger.trace('exiting stacks.handlers#updateStack()');
+        return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update stack');
     }
 }
 
 async function deleteStack(req, res) {
-    logger.trace('entering stacks.handlers#deleteStack()');
-    let action = 'delete stack';
     try {
         await stacks.remove(req.params.id);
-        return response.sendOkResponse(action, res, httpStatus.OK, {});
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully removed the stack');
     } catch (err) {
         logger.error(err);
-        return response.sendErrorResponse(action, res, err);
-    } finally {
-        logger.trace('exiting stacks.handlers#deleteStack()');
+        return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to delete stack');
     }
 }

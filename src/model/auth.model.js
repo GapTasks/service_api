@@ -1,28 +1,32 @@
-const db = require('./db/auth.db');
-const errors = require('../util/error');
-const uuid = require('uuid/v4');
-
-const Algorithm = {
-    SHA256: 'sha256'
-};
+const shortid = require('shortid');
+const mongoose = require('mongoose');
+require('./db/auth.schema');
+const db = mongoose.model('Auth');
 
 class AuthInfo {
     constructor(properties) {
-        this.id = properties.id || properties._id || uuid();
+        this.id = properties.id || properties._id || shortid.generate();
         this.user = properties.user || '';
         this.salt = properties.salt || '';
         this.hash = properties.hash || '';
-        this.algo = properties.algo || Algorithms.SHA256;
+        this.algo = properties.algo || AuthInfo.Algorithm.SHA256;
         this.last = properties.last || Date.now();
     }
 }
 
+AuthInfo.Algorithm = {
+    SHA256: 'sha256'
+};
+
 function find(query) {
+    let q = {};
+    if (query.id) q._id = query.id;
+    if (query.user) q.user = query.user;
     return new Promise((resolve, reject) => {
-        db.find(query)
+        db.find(q)
             .lean()
             .exec((err, docs) => {
-                if (err) return reject(errors.translate(err, 'retrieve authentication info'));
+                if (err) return reject(new Error('Failed to retrieve authentication info: ' + err.message));
                 if (!docs || docs.length == 0) {
                     return resolve(undefined);
                 }
@@ -39,7 +43,7 @@ function merge(authInfo) {
         db.findOneAndUpdate({ _id: authInfo.id }, authInfo, { new: true, upsert: true })
             .lean()
             .exec((err, doc) => {
-                if (err) return reject(errors.translate(err, 'save authentication info'));
+                if (err) return reject(new Error('Failed to save authentication info: ' + err.message));
                 return resolve(new AuthInfo(doc));
             });
     });
@@ -48,14 +52,13 @@ function merge(authInfo) {
 function remove(query) {
     return new Promise((resolve, reject) => {
         db.deleteMany(query, err => {
-            if (err) return reject(errors.translate(err, 'remove authentication info'));
+            if (err) return reject(new Error('Failed to remove authentication info: ' + err.message));
             return resolve(true);
         });
     });
 }
 
 module.exports = {
-    Algorithm,
     AuthInfo,
     find,
     merge,
