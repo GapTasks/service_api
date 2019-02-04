@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const httpStatus = require('http-status');
 const apiRouter = express.Router();
 const passport = require('passport');
 const authToken = require('../../util/auth-token');

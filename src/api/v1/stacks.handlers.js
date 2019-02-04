@@ -10,7 +10,7 @@ module.exports = {
     deleteStack
 };
 
-function generateRestRsponse(stack) {
+function generateRestResponse(stack) {
     let self = '/stacks/' + stack.id;
     return {
         ...stack,
@@ -24,7 +24,7 @@ async function addStack(req, res) {
     try {
         let newStack = new stacks.Stack(req.body, false);
         await stacks.merge(newStack);
-        let resBody = generateRestRsponse(newStack);
+        let resBody = generateRestResponse(newStack);
         return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new stack', resBody);
     } catch (err) {
         logger.error(err);
@@ -34,8 +34,12 @@ async function addStack(req, res) {
 
 async function getStack(req, res) {
     try {
-        let stack = await stacks.find({ id: req.params.id });
-        let resBody = generateRestRsponse(stack);
+        let requestedID = req.params ? req.params.id : undefined
+        if(!requestedID){
+            return await getAllStacks(req, res);
+        }
+        let stack = await stacks.find({ id: requestedID });
+        let resBody = generateRestResponse(stack);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stack', resBody);
     } catch (err) {
         logger.error(err);
@@ -43,11 +47,22 @@ async function getStack(req, res) {
     }
 }
 
+async function getAllStacks(req, res){
+    try{
+        let allStacks = await stacks.all();
+        let resBody = generateRestResponse(allStacks);
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
+    }catch (err){
+        logger.error(err);
+        return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get stacks');
+    }
+}
+
 async function updateStack(req, res) {
     try {
         req.body.id = req.params.id;
         let stack = await stacks.merge(req.body);
-        let resBody = generateRestRsponse(stack);
+        let resBody = generateRestResponse(stack);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully updated stack', resBody);
     } catch (err) {
         logger.error(err);

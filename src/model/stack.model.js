@@ -23,14 +23,14 @@ function all() {
 
 function find(query) {
     let q = {};
-    if (query.id) q._id = query.id;
-    if (query.name) q.name = query.name;
+    if (query && query.id) q._id = query.id;
+    if (query && query.name) q.name = query.name;
     return new Promise((resolve, reject) => {
         db.find(q)
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                if (!res || res.length === 0) return resolve(undefined);
+                if (!res) return resolve(undefined);
                 if (res.length === 1) return resolve(new Stack(res[0]));
                 return resolve(res.map(doc => new Stack(doc)));
             });

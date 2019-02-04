@@ -4,6 +4,7 @@ const config = require('config');
 const api = require('./api/v1/routes');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+var cors = require('cors')
 const logger = require('winstonson')(module);
 logger.setDateFormat('YYYY-MM-DD HH:MM:ss.SSS');
 
@@ -23,6 +24,9 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
     console.log(`Connected to Mongo at ${mongoUrl}`);
     const app = express();
+
+    // Need help: Braden . Here I had to add the cors package because I was getting a cors error. I wonder if you had to do it.
+    //app.use(cors({credentials:"true", origin:"http://localhost:8080"}));
 
     // Add trace logging on HTTP requests with Morgan
     app.use(
