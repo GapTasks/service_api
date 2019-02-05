@@ -54,5 +54,5 @@ async function login(req, res) {
 async function verifyAuthorized(req, res) {
     // We should not get to this point unless the request came with a valid authorization token. Just return
     // success
-    return response.sendQueryResponse(res, status.OK, { message: 'Token still valid' });
+    return response.sendOkResponse(res, status.OK, { message: 'Token still valid' });
 }
