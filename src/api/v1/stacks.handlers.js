@@ -1,4 +1,5 @@
 const stacks = require('../../model/stack.model');
+const taskHandler = require('./task.handlers');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
@@ -25,7 +26,12 @@ async function addStack(req, res) {
         let newStack = new stacks.Stack(req.body, false);
         await stacks.merge(newStack);
         let resBody = generateRestResponse(newStack);
-        return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new stack', resBody);
+
+        let taskRes =  taskHandler.addTask(req, res);
+        if(taskRes.status===INTERNAL_SERVER_ERROR){
+            await stacks.remove(req.params.id);
+        }
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {
         logger.error(err);
         response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create stack');
