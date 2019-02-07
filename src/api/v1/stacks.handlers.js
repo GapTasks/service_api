@@ -1,5 +1,6 @@
 const stacks = require('../../model/stack.model');
-const taskHandler = require('./task.handlers');
+const tasks = require('../../model/task.model');
+const taskHandler = require('./tasks.handlers');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
@@ -23,14 +24,12 @@ function generateRestResponse(stack) {
 
 async function addStack(req, res) {
     try {
-        let newStack = new stacks.Stack(req.body, false);
+        const {name, time_needed, mood} = req.body.payload;
+        let newStack = new stacks.Stack({name}, false);
         await stacks.merge(newStack);
-        let resBody = generateRestResponse(newStack);
-
-        let taskRes =  taskHandler.addTask(req, res);
-        if(taskRes.status===INTERNAL_SERVER_ERROR){
-            await stacks.remove(req.params.id);
-        }
+        let newTask = new tasks.Task({name, time_needed, mood, stack: newStack.id}, false);
+        await tasks.merge(newTask);
+        let resBody = generateRestResponse({...newStack, ...newTask});
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {
         logger.error(err);
@@ -53,11 +52,19 @@ async function getStack(req, res) {
     }
 }
 
+async function stacksMap(s){
+    let _tasks = await tasks.find({stack:s.id})
+    return {...s, tasks: _tasks}
+}
+
 async function getAllStacks(req, res){
     try{
         let allStacks = await stacks.all();
-        let resBody = generateRestResponse(allStacks);
-        return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
+        let stacksArr = allStacks.map(stacksMap);
+        Promise.all(stacksArr).then(function(stackWithTasks){
+            let resBody = generateRestResponse(stackWithTasks);
+            return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
+        })
     }catch (err){
         logger.error(err);
         return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get stacks');

@@ -8,6 +8,7 @@ const authToken = require('../../util/auth-token');
 const users = require('./users.routes');
 const auth = require('./auth.routes');
 const stacks = require('./stacks.routes');
+const tasks = require('./tasks.routes');
 
 authToken.createPassportStrategy((err, strategy) => {
     if (err) throw new Error('Failed to create passport strategy: ' + err.message);
@@ -32,6 +33,7 @@ authToken.createPassportStrategy((err, strategy) => {
     // All other routes should be protected and require a token
     apiRouter.use(passport.authenticate('jwt', { session: false }));
     apiRouter.use(prefix, stacks);
+    apiRouter.use(prefix, tasks);
 
     apiRouter.use((req, res) => {
         return res.status(httpStatus.BAD_REQUEST).json({

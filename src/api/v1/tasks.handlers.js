@@ -94,7 +94,8 @@ async function getAllTasks(req, res){
 
 async function searchTasks(req, res){
     try{
-        let task = await tasks.find({ ...req.params });
+        //let task = await tasks.find({ ...req.params });
+        let task = await tasks.find({});
         let resBody = generateRestResponse(task);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved task', resBody);
     }catch(err){
