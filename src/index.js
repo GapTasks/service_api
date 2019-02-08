@@ -44,7 +44,8 @@ db.once('open', () => {
     const app = express();
     
     // Need help: Braden . Here I had to add the cors package because I was getting a cors error. I wonder if you had to do it.
-
+    app.use(cors(corsOptions));
+    app.use(allowUnAuthenticatedOptions);
 
     // Add trace logging on HTTP requests with Morgan
     app.use(
@@ -61,8 +62,6 @@ db.once('open', () => {
     );
 
     app.use(api);
-    app.use(cors(corsOptions));
-    app.use(allowUnAuthenticatedOptions);
 
     app.use((req, res) => {
         res.status(400).send('Bad request');
