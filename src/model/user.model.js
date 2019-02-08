@@ -4,8 +4,10 @@ require('./db/user.schema')
 const db = mongoose.model('User');
 
 class User {
+
     constructor(props) {
-        this.username = props.username || props.id || props._id || shortid.generate();
+        this.id = props.id || props._id || shortid.generate();
+        this.username = props.username;
         this.name = props.name || null;
         this.email = props.email || null;
         this.stacks = props.stacks || [];

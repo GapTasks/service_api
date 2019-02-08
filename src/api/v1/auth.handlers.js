@@ -31,10 +31,11 @@ async function login(req, res) {
                 status.NOT_FOUND,
                 `Could not find user with username '${req.body.username}'`
             );
+        debugger;
         let authInfo = await AuthModel.find({ user: user.id });
-        if(authInfo.length){
-            authInfo = authInfo[0]; //SHAME
-        }
+        // if(authInfo.length){
+        //     authInfo = authInfo[0]; //SHAME
+        // }
         if (!authInfo) return response.sendErrorResponse(res, status.NOT_FOUND, 'Could not autheticate the user');
         let hashed = hash(authInfo.algo, authInfo.salt, req.body.password);
         if (hashed != authInfo.hash) {
