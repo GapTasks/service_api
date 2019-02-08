@@ -31,7 +31,6 @@ async function login(req, res) {
                 status.NOT_FOUND,
                 `Could not find user with username '${req.body.username}'`
             );
-        debugger;
         let authInfo = await AuthModel.find({ user: user.id });
         // if(authInfo.length){
         //     authInfo = authInfo[0]; //SHAME
