@@ -60,6 +60,9 @@ async function stacksMap(s){
 async function getAllStacks(req, res){
     try{
         let allStacks = await stacks.all();
+        if(allStacks.id) {
+            allStacks = [allStacks];
+        }
         let stacksArr = allStacks.map(stacksMap);
         Promise.all(stacksArr).then(function(stackWithTasks){
             let resBody = generateRestResponse(stackWithTasks);
