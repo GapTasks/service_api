@@ -14,6 +14,7 @@ var cors = require('cors');
 const corsOptions = {
     "origin": ["http://localhost:8080", "http://gaptasks.com:8000", "http://142.93.80.114:8000"],
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    "allowedHeaders": "Content-Type,origin",
     "credentials": true,
     "preflightContinue": false,
     "optionsSuccessStatus": 204
@@ -37,7 +38,7 @@ authToken.createPassportStrategy((err, strategy) => {
     apiRouter.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', req.headers.origin);
         res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Allow-Headers', 'Content-Type');
+        res.header('Access-Control-Allow-Headers', 'Content-Type,origin');
         res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE');
         next();
     });
