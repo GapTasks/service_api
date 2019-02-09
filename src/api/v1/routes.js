@@ -34,7 +34,6 @@ authToken.createPassportStrategy((err, strategy) => {
     passport.use(strategy);
     apiRouter.use(bodyParser.json());
     apiRouter.use(cookieParser());
-    debugger;
     apiRouter.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', req.headers.origin);
         res.header('Access-Control-Allow-Credentials', 'true');

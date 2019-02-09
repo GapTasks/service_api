@@ -18,7 +18,7 @@ class Stack {
 }
 
 function all() {
-    return find();
+    return find({_all: true});
 }
 
 function find(query) {
@@ -30,7 +30,9 @@ function find(query) {
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                if (!res) return resolve(undefined);
+                if (!res) {
+                    return query._all ? resolve([]) : resolve(undefined);
+                }
                 if (res.length === 1) return resolve(new Stack(res[0]));
                 return resolve(res.map(doc => new Stack(doc)));
             });
