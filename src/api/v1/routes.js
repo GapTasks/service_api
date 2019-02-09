@@ -44,7 +44,7 @@ authToken.createPassportStrategy((err, strategy) => {
     });
 
     //apiRouter.use(cors(corsOptions));
-    apiRouter.use(allowUnAuthenticatedOptions);
+    //apiRouter.use(allowUnAuthenticatedOptions);
     let prefix = '/api/v1';
 
     // For the auth and user routes, not all of them should be authenticated. Otherwise we won't be able to login or
