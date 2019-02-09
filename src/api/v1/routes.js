@@ -12,7 +12,7 @@ const tasks = require('./tasks.routes');
 var cors = require('cors');
 
 const corsOptions = {
-    "origin": ["http://localhost:8080", "http://gaptasks.com:8000", "http://142.93.80.114:8000"],
+    "origin": ["http://localhost:8080", "http://gaptasks.com", "http://142.93.80.114"],
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     "allowedHeaders": "Content-Type,origin",
     "credentials": true,
@@ -36,7 +36,7 @@ authToken.createPassportStrategy((err, strategy) => {
     apiRouter.use(bodyParser.json());
     apiRouter.use(cookieParser());
     apiRouter.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', ["http://localhost:8080", "http://gaptasks.com:8000", "http://142.93.80.114:8000"]);
+        res.header('Access-Control-Allow-Origin', ["http://localhost:8080", "http://gaptasks.com", "http://142.93.80.114"]);
         res.header('Access-Control-Allow-Credentials', 'true');
         res.header('Access-Control-Allow-Headers', 'Content-Type,origin');
         res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE');
