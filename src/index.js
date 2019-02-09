@@ -12,7 +12,7 @@ const serverConfig = config.get('server');
 const databaseConfig = config.get('database');
 
 const corsOptions = {
-    "origin": ["http://localhost:8080", "http://www.gaptasks.com", "http://142.93.80.114"],
+    "origin": "http://www.gaptasks.com",
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     "allowedHeaders": "Content-Type,origin",
     "credentials": true,
@@ -45,7 +45,7 @@ db.once('open', () => {
     const app = express();
     
     // Need help: Braden . Here I had to add the cors package because I was getting a cors error. I wonder if you had to do it.
-    //app.use(cors(corsOptions));
+    app.use(cors(corsOptions));
     app.use(allowUnAuthenticatedOptions);
 
     // Add trace logging on HTTP requests with Morgan
