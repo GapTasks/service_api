@@ -12,7 +12,7 @@ const tasks = require('./tasks.routes');
 var cors = require('cors');
 
 const corsOptions = {
-    "origin": ["http://localhost:8080", "http://gaptasks.com", "http://142.93.80.114"],
+    "origin": ["http://localhost:8080", "http://www.gaptasks.com", "http://142.93.80.114"],
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     "allowedHeaders": "Content-Type,origin",
     "credentials": true,
