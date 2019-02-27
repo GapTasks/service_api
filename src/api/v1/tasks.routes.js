@@ -1,12 +1,13 @@
 const express = require('express');
 const handlers = require('./tasks.handlers');
 
-const stacksApi = express.Router();
+const tasksAPi = express.Router();
 
-stacksApi.post('/tasks', handlers.addTask);
-stacksApi.get('/tasks/:id?', handlers.getTask);
-stacksApi.get('/search_tasks', handlers.searchTasks);
-stacksApi.patch('/tasks/:id', handlers.updateTask);
-stacksApi.delete('/tasks/:id', handlers.deleteTask);
+tasksAPi.post('/tasks', handlers.addTask);
+tasksAPi.get('/tasks', handlers.getAllTasks);
+tasksAPi.get('/tasks/:id', handlers.getTask);
+tasksAPi.get('/search_tasks', handlers.searchTasks);
+tasksAPi.patch('/tasks/:id', handlers.updateTask);
+tasksAPi.delete('/tasks/:id', handlers.deleteTask);
 
-module.exports = stacksApi;
+module.exports = tasksAPi;

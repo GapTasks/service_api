@@ -1,12 +1,11 @@
 const shortid = require('shortid');
 const mongoose = require('mongoose');
-require('./db/stack.schema')
+require('./db/stack.schema');
 const db = mongoose.model('Stack');
-
 
 class Stack {
     constructor(props, allowId = true) {
-        if(allowId) {
+        if (allowId) {
             this.id = props.id || props._id || shortid.generate();
         } else {
             this.id = shortid.generate();
@@ -17,11 +16,7 @@ class Stack {
     }
 }
 
-function all() {
-    return find({_all: true});
-}
-
-function find(query) {
+function find(query = {}) {
     let q = {};
     if (query && query.id) q._id = query.id;
     if (query && query.name) q.name = query.name;
@@ -30,10 +25,7 @@ function find(query) {
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                if (!res) {
-                    return query._all ? resolve([]) : resolve(undefined);
-                }
-                if (res.length === 1) return resolve(new Stack(res[0]));
+                if (!res) return resolve([]);
                 return resolve(res.map(doc => new Stack(doc)));
             });
     });
@@ -65,7 +57,6 @@ function remove(id) {
 
 module.exports = {
     Stack,
-    all,
     find,
     merge,
     remove
