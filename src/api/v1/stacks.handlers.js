@@ -24,8 +24,9 @@ function generateRestResponse(stack) {
 
 async function addStack(req, res) {
     try {
+        debugger;
         const {name, time_needed, mood} = req.body.payload;
-        let newStack = new stacks.Stack({name}, false);
+        let newStack = new stacks.Stack({name, user: req.user.sub}, false);
         await stacks.merge(newStack);
         let newTask = new tasks.Task({name, time_needed, mood, stack: newStack.id}, false);
         await tasks.merge(newTask);
@@ -39,7 +40,7 @@ async function addStack(req, res) {
 
 async function getStack(req, res) {
     try {
-        let requestedID = req.params ? req.params.id : undefined
+        let requestedID = req.params ? req.params.id : undefined;
         if(!requestedID){
             return await getAllStacks(req, res);
         }
@@ -59,7 +60,7 @@ async function stacksMap(s){
 
 async function getAllStacks(req, res){
     try{
-        let allStacks = await stacks.all();
+        let allStacks = await stacks.find({user: req.user.sub});
         if(allStacks.id) {
             allStacks = [allStacks];
         }

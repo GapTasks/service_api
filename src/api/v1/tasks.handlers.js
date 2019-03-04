@@ -1,4 +1,5 @@
 const tasks = require('../../model/task.model');
+const stacks = require('../../model/stack.model');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
@@ -94,9 +95,9 @@ async function getAllTasks(req, res){
 
 async function searchTasks(req, res){
     try{
-        //let task = await tasks.find({ ...req.params });
-        let task = await tasks.find({});
-        let resBody = generateRestResponse(task);
+        const _stacks = await stacks.find({user: req.user.sub});
+        const _tasks = await tasks.find({...req.params, stack:{$in:_stacks}});
+        let resBody = generateRestResponse(_tasks);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved task', resBody);
     }catch(err){
         logger.error(err);

@@ -14,6 +14,7 @@ class Stack {
         this.name = props.name || null;
         this.deadline = props.deadline || Date.now();
         this.priority = props.priority || 0;
+        this.user = props.user;
     }
 }
 
@@ -24,7 +25,7 @@ function all() {
 function find(query) {
     let q = {};
     if (query && query.id) q._id = query.id;
-    if (query && query.name) q.name = query.name;
+    q = {...q, ...query};
     return new Promise((resolve, reject) => {
         db.find(q)
             .lean()
