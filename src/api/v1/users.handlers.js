@@ -32,16 +32,16 @@ function prepUserResponse(user) {
 
 async function addNewUser(req, res) {
     try {
-        if(!req.body.username || !req.body.password){
+        if (!req.body.username || !req.body.password) {
             return response.sendErrorResponse(res, status.BAD_REQUEST, 'Missing username and/or password');
         }
         logger.trace('Verifying user does not already exist');
-        let user = await UserModel.find({ username: req.body.username });
-        if( user !== undefined) {
+        let users = await UserModel.find({ username: req.body.username });
+        if (users.length > 0) {
             return response.sendOkResponse(res, status.OK, 'User already exists', user);
         }
         logger.trace('Adding new user with username ' + req.body.username);
-        user = new UserModel.User(req.body);
+        let user = new UserModel.User(req.body);
         user.lastLogin = Date.now();
         user = await UserModel.merge(user);
         logger.trace('Added user. Generating authentication entry');
@@ -61,7 +61,11 @@ async function addNewUser(req, res) {
 async function getUser(req, res) {
     try {
         logger.trace('Retrieving user');
-        let user = await UserModel.find({ id: req.params.id });
+        let users = await UserModel.find({ id: req.params.id });
+        if (users.length === 0) {
+            return response.sendErrorResponse(res, status.NOT_FOUND, 'Failed to find user');
+        }
+        let user = users[0];
         prepUserResponse(user);
         return response.sendOkResponse(res, status.OK, 'Successfully found user', user);
     } catch (err) {

@@ -8,6 +8,7 @@ const httpStatus = require('http-status');
 module.exports = {
     addStack,
     getStack,
+    getAllStacks,
     updateStack,
     deleteStack
 };
@@ -24,13 +25,12 @@ function generateRestResponse(stack) {
 
 async function addStack(req, res) {
     try {
-        debugger;
         const {name, time_needed, mood} = req.body.payload;
         let newStack = new stacks.Stack({name, user: req.user.sub}, false);
         await stacks.merge(newStack);
-        let newTask = new tasks.Task({name, time_needed, mood, stack: newStack.id}, false);
+        let newTask = new tasks.Task({ name, time_needed, mood, stack: newStack.id }, false);
         await tasks.merge(newTask);
-        let resBody = generateRestResponse({...newStack, ...newTask});
+        let resBody = generateRestResponse({ ...newStack, ...newTask });
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {
         logger.error(err);
@@ -40,11 +40,11 @@ async function addStack(req, res) {
 
 async function getStack(req, res) {
     try {
-        let requestedID = req.params ? req.params.id : undefined;
-        if(!requestedID){
-            return await getAllStacks(req, res);
+        let stacksArray = await stacks.find({ id: requestedID });
+        if (stacksArray.length === 0) {
+            return response.sendErrorResponse(res, httpStatus.NOT_FOUND, 'Failed to find stack');
         }
-        let stack = await stacks.find({ id: requestedID });
+        let stack = stacksArray[0];
         let resBody = generateRestResponse(stack);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stack', resBody);
     } catch (err) {
@@ -53,9 +53,10 @@ async function getStack(req, res) {
     }
 }
 
-async function stacksMap(s){
-    let _tasks = await tasks.find({stack:s.id})
-    return {...s, tasks: _tasks}
+async function stacksMap(s) {
+    let _tasks = await tasks.find({ stack: s.id });
+    console.log(_tasks);
+    return { ...s, tasks: _tasks };
 }
 
 async function getAllStacks(req, res){
@@ -65,11 +66,10 @@ async function getAllStacks(req, res){
             allStacks = [allStacks];
         }
         let stacksArr = allStacks.map(stacksMap);
-        Promise.all(stacksArr).then(function(stackWithTasks){
-            let resBody = generateRestResponse(stackWithTasks);
-            return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
-        })
-    }catch (err){
+        let stacksResult = await Promise.all(stacksArr);
+        let resBody = stacksResult.map(s => generateRestResponse(s));
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
+    } catch (err) {
         logger.error(err);
         return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get stacks');
     }

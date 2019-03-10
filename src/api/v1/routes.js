@@ -8,6 +8,7 @@ const authToken = require('../../util/auth-token');
 const users = require('./users.routes');
 const auth = require('./auth.routes');
 const stacks = require('./stacks.routes');
+const friends = require('./friends.routes');
 const tasks = require('./tasks.routes');
 var cors = require('cors');
 
@@ -56,6 +57,7 @@ authToken.createPassportStrategy((err, strategy) => {
     apiRouter.use(passport.authenticate('jwt', { session: false }));
     apiRouter.use(prefix, stacks);
     apiRouter.use(prefix, tasks);
+    apiRouter.use(prefix, friends);
 
     apiRouter.use((req, res) => {
         return res.status(httpStatus.BAD_REQUEST).json({

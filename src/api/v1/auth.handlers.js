@@ -24,14 +24,14 @@ async function login(req, res) {
     try {
         if (!req.body.username || !req.body.password)
             return response.sendErrorResponse(res, status.BAD_REQUEST, 'Missing username and/or password');
-        let user = await UserModel.find({ username: req.body.username });
+        let user = (await UserModel.find({ username: req.body.username }))[0];
         if (!user)
             return response.sendErrorResponse(
                 res,
                 status.NOT_FOUND,
                 `Could not find user with username '${req.body.username}'`
             );
-        let authInfo = await AuthModel.find({ user: user.id });
+        let authInfo = (await AuthModel.find({ user: user.id }))[0];
         // if(authInfo.length){
         //     authInfo = authInfo[0]; //SHAME
         // }

@@ -14,11 +14,7 @@ class User {
     }
 }
 
-function all() {
-    return find();
-}
-
-function find(query) {
+function find(query = {}) {
     let q = {};
     if (query.username) q._id = query.username;
     if (query.name) q.name = query.name;
@@ -27,8 +23,7 @@ function find(query) {
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                if (!res || res.length === 0) return resolve(undefined);
-                if (res.length === 1) return resolve(new User(res[0]));
+                if (!res || res.length === 0) return resolve([]);
                 return resolve(res.map(doc => new User(doc)));
             });
     });
@@ -60,7 +55,6 @@ function remove(username) {
 
 module.exports = {
     User,
-    all,
     find,
     merge,
     remove

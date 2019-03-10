@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha test/ --recursive",
-    "start": "node src/index.js",
+    "start": "nodemon npm node src/index.js",
     "debug": "node --inspect src/index.js"
   },
   "repository": {
