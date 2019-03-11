@@ -3,6 +3,7 @@ const stacks = require('../../model/stack.model');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
+const chatkit = require('../../util/chatkit');
 
 function generateRestResponse(task) {
     let self = '/tasks/' + task.id;
@@ -26,8 +27,10 @@ module.exports = {
 
 async function addTask(req, res) {
     try {
-        let newTask = new tasks.Task(req.body);
+        const {name, time_needed, mood, stack} = req.body.payload;
+        let newTask = new tasks.Task({ name, time_needed, mood, stack: stack }, false);
         await tasks.merge(newTask);
+        chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
         let resBody = generateRestResponse(newTask);
         return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new task', resBody);
     } catch (err) {

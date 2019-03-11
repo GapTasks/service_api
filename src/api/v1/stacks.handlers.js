@@ -4,6 +4,7 @@ const taskHandler = require('./tasks.handlers');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
+const chatkit = require('../../util/chatkit');
 
 module.exports = {
     addStack,
@@ -30,6 +31,7 @@ async function addStack(req, res) {
         await stacks.merge(newStack);
         let newTask = new tasks.Task({ name, time_needed, mood, stack: newStack.id }, false);
         await tasks.merge(newTask);
+        chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
         let resBody = generateRestResponse({ ...newStack, ...newTask });
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {
@@ -54,14 +56,16 @@ async function getStack(req, res) {
 }
 
 async function stacksMap(s) {
-    let _tasks = await tasks.find({ stack: s.id });
+    let _tasks = await tasks.find({});
+    _tasks = _tasks.filter((e, _)=>e.stack == s.id);
     console.log(_tasks);
     return { ...s, tasks: _tasks };
 }
 
 async function getAllStacks(req, res){
     try{
-        let allStacks = await stacks.find({user: req.user.sub});
+        let targetUser = req.query.owner ? req.query.owner : req.user.sub;
+        let allStacks = await stacks.find({user: targetUser});
         if(allStacks.id) {
             allStacks = [allStacks];
         }

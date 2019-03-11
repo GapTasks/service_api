@@ -1,4 +1,4 @@
-const friendship = require('../../model/friendship.model');
+const friendshipModel = require('../../model/friendship.model');
 const userModel = require('../../model/user.model');
 const logger = require('winstonson')(module);
 const response = require('./response');
@@ -49,8 +49,8 @@ async function addFriend(req, res){
     try{
         const friend = req.body.friend;
         const username = req.user.sub;
-        let newFriendship = new friendship.Friendship({friend1: username, friend2: friend, status: "initiated", initiator: username}, false);
-        await friendship.merge(newFriendship)
+        let newFriendship = new friendshipModel.Friendship({friend1: username, friend2: friend, status: "initiated", initiator: username}, false);
+        await friendshipModel.merge(newFriendship)
         let resBody = generateRestResponse({newFriendship});
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully initiated friendship', resBody);
     }catch(err){
@@ -62,7 +62,7 @@ async function addFriend(req, res){
 async function getFriendships(req, res){
     try{
         const username = req.user.sub;
-        const friendships = await friendship.find({$or: [{friend1: username}, {friend2: username}]});
+        const friendships = await friendshipModel.find({$or: [{friend1: username}, {friend2: username}]});
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully initiated friendship', {friendships, username});
     }catch(err){
         logger.error(err);
@@ -73,10 +73,14 @@ async function getFriendships(req, res){
 async function acceptFriend(req, res){
     try{
         const username = req.user.sub;
-        const friend = req.body.friend;
-        const friendship = {friend1: friend, friend2: username, status:"accepted", initiator: friend}
-        const status = await friendship.merge({friendship});
-        return response.sendOkResponse(res, httpStatus.OK, 'Successfully accepted friendship', {status});
+        const friendship = req.body.friendship;
+        let targetFriendship = await friendshipModel.find({_id:friendship});
+        targetFriendship = targetFriendship[0];
+        if(targetFriendship && (targetFriendship.friend1 == username || targetFriendship.friend2 == username) && targetFriendship.initiator!=username){
+            const newFriendship = {id:targetFriendship.id, status:"accepted"}
+            const status = await friendshipModel.merge(newFriendship);
+            return response.sendOkResponse(res, httpStatus.OK, 'Successfully accepted friendship', {status});
+        }
     }catch(err){
         logger.error(err);
         response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to accept friend');
@@ -86,10 +90,16 @@ async function acceptFriend(req, res){
 async function denyFriend(req, res){
     try{
         const username = req.user.sub;
-        const friend = req.body.friend;
-        const friendship = {friend1: friend, friend2: username, status:"denied", initiator: friend}
-        const status = await friendship.merge({friendship});
-        return response.sendOkResponse(res, httpStatus.OK, 'Successfully denied friendship', {status});
+        const friendship = req.body.friendship;
+        let targetFriendship = await friendshipModel.find({_id:friendship});
+        targetFriendship = targetFriendship[0];
+        if(targetFriendship && (targetFriendship.friend1 == username || targetFriendship.friend2 == username) && targetFriendship.initiator!=username){
+            const newFriendship = {id:targetFriendship.id};
+            const status = await friendshipModel.remove(newFriendship.id);
+            const username = req.user.sub;
+            const friendships = await friendshipModel.find({$or: [{friend1: username}, {friend2: username}]});
+            return response.sendOkResponse(res, httpStatus.OK, 'Successfully denied friendship', {friendships, username});
+        }
     }catch(err){
         logger.error(err);
         response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to deny friend');

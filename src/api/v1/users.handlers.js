@@ -7,6 +7,7 @@ const logger = require('winstonson')(module);
 const crypto = require('crypto');
 const config = require('config');
 const _config = config.get('security');
+const chatkitUtil = require('../../util/chatkit');
 
 module.exports = {
     getUser,
@@ -51,6 +52,7 @@ async function addNewUser(req, res) {
         await AuthModel.merge(new AuthModel.AuthInfo({ user: user.id, salt, algo, hash: h }));
         logger.trace('Authentication entry added. Preparing response');
         prepUserResponse(user);
+        chatkitUtil.createChatkitUser({userId: user.id, name: user.name, customData:{email:user.email}});
         return response.sendOkResponse(res, status.CREATED, 'Successfully created new user', user);
     } catch (err) {
         logger.error(err);
