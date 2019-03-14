@@ -11,6 +11,7 @@ class Task {
         this.mood = props.mood || null;
         this.timeNeeded = props.timeNeeded || props.time_needed || 0;
         this.stack = props.stack || null;
+        this.chatRoomId = props.chatRoomId || null;
     }
 }
 

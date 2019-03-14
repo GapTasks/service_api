@@ -30,8 +30,9 @@ async function addStack(req, res) {
         let newStack = new stacks.Stack({name, user: req.user.sub}, false);
         await stacks.merge(newStack);
         let newTask = new tasks.Task({ name, time_needed, mood, stack: newStack.id }, false);
+        const result = await chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
+        newTask.chatRoomId = result.id;
         await tasks.merge(newTask);
-        chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
         let resBody = generateRestResponse({ ...newStack, ...newTask });
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {

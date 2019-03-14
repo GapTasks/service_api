@@ -9,7 +9,8 @@ module.exports = {
     getFriendships,
     addFriend,
     acceptFriend,
-    denyFriend
+    denyFriend,
+    getUserProfile
 };
 
 function generateRestSuggestionResponse(search, users) {
@@ -105,14 +106,20 @@ async function denyFriend(req, res){
         response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to deny friend');
     }
 }
-/*
-async function  get_user(req, res){
+
+
+async function  getUserProfile(req, res){
     try {
-
+        const username = req.user.sub
+        let user = await userModel.find({username: username});
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully got profile', {profile: user});
     }catch(err){
-
+        logger.error(err);
+        response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get profile');
     }
 }
+
+/*
 
 async function  friends(req, res){
     try {

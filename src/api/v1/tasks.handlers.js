@@ -29,8 +29,10 @@ async function addTask(req, res) {
     try {
         const {name, time_needed, mood, stack} = req.body.payload;
         let newTask = new tasks.Task({ name, time_needed, mood, stack: stack }, false);
+        
+        const result = await chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
+        newTask.chatRoomId = result.id;
         await tasks.merge(newTask);
-        chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
         let resBody = generateRestResponse(newTask);
         return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new task', resBody);
     } catch (err) {

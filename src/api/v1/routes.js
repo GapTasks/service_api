@@ -10,6 +10,8 @@ const auth = require('./auth.routes');
 const stacks = require('./stacks.routes');
 const friends = require('./friends.routes');
 const tasks = require('./tasks.routes');
+const chat = require('./chat.routes');
+
 var cors = require('cors');
 
 const corsOptions = {
@@ -58,6 +60,7 @@ authToken.createPassportStrategy((err, strategy) => {
     apiRouter.use(prefix, stacks);
     apiRouter.use(prefix, tasks);
     apiRouter.use(prefix, friends);
+    apiRouter.use(prefix, chat);
 
     apiRouter.use((req, res) => {
         return res.status(httpStatus.BAD_REQUEST).json({

@@ -2,6 +2,7 @@
 const Chatkit = require('@pusher/chatkit-server');
 const config = require('config');
 const chatkitConfig = config.get("chatkit")
+const tasks = require('../model/task.model');
 
 const chatkit = new Chatkit.default({
     instanceLocator: chatkitConfig.instanceLocator,
@@ -9,20 +10,20 @@ const chatkit = new Chatkit.default({
 })
 
 
-function createChatkitUser({userId, name, customData}){
+async function createChatkitUser({userId, name, customData}){
     return chatkit.createUser({
         id: userId,
         name: name,
     })
 }
 
-function getUser({userId}, callback){
+async function getUser({userId}, callback){
     return chatkit.getUser({
         id: userId,
       })
 }
 
-function createRoom({userId, taskId, customData}){
+async function createRoom({userId, taskId, customData}){
     return chatkit.createRoom({
         creatorId: userId,
         name: taskId,
@@ -30,36 +31,40 @@ function createRoom({userId, taskId, customData}){
       })
 }
 
-function getRoom({roomId}){
+async function getRoom({roomId}){
   return chatkit.getRoom({
     roomId: roomId,
   })
 }
 
-function addUsersToRoom({roomId, users}){
+async function addUsersToRoom({roomId, users}){
   return chatkit.addUsersToRoom({
     roomId: roomId,
     userIds: users
   })
 }
 
-function deleteRoom({roomId}){
-  chatkit.deleteRoom({
+async function deleteRoom({roomId}){
+  return chatkit.deleteRoom({
     id: roomId
   })
 }
 
-function sendMessage({userId, roomId, text}){
-  chatkit.sendSimpleMessage({
+async function sendMessage({userId, roomId, text}){
+  let task = await tasks.find({ id: roomId });
+  const chatRoomId = task[0].chatRoomId;
+  return chatkit.sendSimpleMessage({
     userId: userId,
-    roomId: roomId,
+    roomId: chatRoomId,
     text: text,
   })
 }
 
-function fetchMessagesFromRoom({roomId}, limit=10){
-  chatkit.fetchMultipartMessages({
-    roomId: room.id,
+async function fetchMessagesFromRoom({room}, limit=10){
+  let task = await tasks.find({ id: room });
+  const chatRoomId = task[0].chatRoomId;
+  return chatkit.fetchMultipartMessages({
+    roomId: chatRoomId,
     limit: limit,
   })
 }

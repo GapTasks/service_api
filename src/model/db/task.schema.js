@@ -6,7 +6,8 @@ const Task = new mongoose.Schema({
     deadline: { type: Number, required: true },
     mood: { type: String, required: true },
     time_needed: { type: Number, required: true },
-    stack: { type: String, required: true }
+    stack: { type: String, required: true },
+    chatRoomId: { type: String, required: true }
 });
 
 mongoose.model('Task', Task);
