@@ -61,7 +61,8 @@ async function completeTask(req, res) {
 
 async function updateTask(req, res) {
     try {
-        req.body.id = req.params.id;
+        debugger;
+        req.body.id = req.body.id;
         let task = await tasks.merge(req.body);
         let resBody = generateRestResponse(task);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully updated task', resBody);
@@ -73,11 +74,11 @@ async function updateTask(req, res) {
 
 async function getTask(req, res) {
     try {
-        let tasks = await tasks.find({ id: requestedID });
-        if (tasks.length === 0) {
+        let result = await tasks.find({ id: req.params.task });
+        if (result.length === 0) {
             return response.sendErrorResponse(res, httpStatus.NOT_FOUND, 'Failed to find task');
         }
-        let task = tasks[0];
+        let task = result[0];
         let resBody = generateRestResponse(task);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved task', resBody);
     } catch (err) {

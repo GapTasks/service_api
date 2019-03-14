@@ -9,7 +9,7 @@ class Task {
         this.name = props.name || null;
         this.deadline = props.deadline || Date.now();
         this.mood = props.mood || null;
-        this.timeNeeded = props.timeNeeded || props.time_needed || 0;
+        this.time_needed = props.time_needed || props.time_needed || 0;
         this.stack = props.stack || null;
         this.chatRoomId = props.chatRoomId || null;
     }
