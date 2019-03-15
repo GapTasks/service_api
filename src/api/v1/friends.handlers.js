@@ -94,7 +94,7 @@ async function denyFriend(req, res){
         const friendship = req.body.friendship;
         let targetFriendship = await friendshipModel.find({_id:friendship});
         targetFriendship = targetFriendship[0];
-        if(targetFriendship && (targetFriendship.friend1 == username || targetFriendship.friend2 == username) && targetFriendship.initiator!=username){
+        if(targetFriendship && (targetFriendship.friend1 == username || targetFriendship.friend2 == username)){
             const newFriendship = {id:targetFriendship.id};
             const status = await friendshipModel.remove(newFriendship.id);
             const username = req.user.sub;
