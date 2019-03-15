@@ -12,7 +12,7 @@ const serverConfig = config.get('server');
 const databaseConfig = config.get('database');
 
 const corsOptions = {
-    "origin": ["http://www.gaptasks.com", "http://localhost:8080"],
+    "origin": ["http://gaptasks.com", "http://www.gaptasks.com", "http://localhost:8080"],
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     "allowedHeaders": "Content-Type,origin",
     "credentials": true,
