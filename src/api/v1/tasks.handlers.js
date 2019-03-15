@@ -61,7 +61,6 @@ async function completeTask(req, res) {
 
 async function updateTask(req, res) {
     try {
-        debugger;
         req.body.id = req.body.id;
         let task = await tasks.merge(req.body);
         let resBody = generateRestResponse(task);
