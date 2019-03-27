@@ -4,11 +4,31 @@ const config = require('config');
 const api = require('./api/v1/routes');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+var cors = require('cors')
 const logger = require('winstonson')(module);
 logger.setDateFormat('YYYY-MM-DD HH:MM:ss.SSS');
 
 const serverConfig = config.get('server');
 const databaseConfig = config.get('database');
+
+const corsOptions = {
+    "origin": ["http://gaptasks.com", "http://www.gaptasks.com", "http://localhost:8080"],
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    "allowedHeaders": "Content-Type,origin",
+    "credentials": true,
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+}
+
+var allowUnAuthenticatedOptions = function(req, res, next) {    
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+      res.sendStatus(204);
+    }
+    else {
+      next();
+    }
+};
 
 const mongoUrl = `mongodb://${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.name}`;
 
@@ -23,6 +43,10 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
     console.log(`Connected to Mongo at ${mongoUrl}`);
     const app = express();
+    
+    // Need help: Braden . Here I had to add the cors package because I was getting a cors error. I wonder if you had to do it.
+    app.use(cors(corsOptions));
+    app.use(allowUnAuthenticatedOptions);
 
     // Add trace logging on HTTP requests with Morgan
     app.use(

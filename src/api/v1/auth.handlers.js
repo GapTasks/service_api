@@ -24,14 +24,17 @@ async function login(req, res) {
     try {
         if (!req.body.username || !req.body.password)
             return response.sendErrorResponse(res, status.BAD_REQUEST, 'Missing username and/or password');
-        let user = await UserModel.find({ username: req.body.username });
+        let user = (await UserModel.find({ username: req.body.username }))[0];
         if (!user)
             return response.sendErrorResponse(
                 res,
                 status.NOT_FOUND,
                 `Could not find user with username '${req.body.username}'`
             );
-        let authInfo = await AuthModel.find({ user: user.id });
+        let authInfo = (await AuthModel.find({ user: user.id }))[0];
+        // if(authInfo.length){
+        //     authInfo = authInfo[0]; //SHAME
+        // }
         if (!authInfo) return response.sendErrorResponse(res, status.NOT_FOUND, 'Could not autheticate the user');
         let hashed = hash(authInfo.algo, authInfo.salt, req.body.password);
         if (hashed != authInfo.hash) {
@@ -43,7 +46,8 @@ async function login(req, res) {
         }
         // Authentication succeeded, generate a token and return it to the user
         let token = await authToken.generate(req.body.username);
-        res.cookie('auth', token);
+        // Set the httpOnly option to false so that the client can delete the cookie
+        res.cookie('auth', token, { httpOnly: false });
         return response.sendOkResponse(res, status.OK, 'Successfully authenticated user', { token });
     } catch (err) {
         logger.error(err);

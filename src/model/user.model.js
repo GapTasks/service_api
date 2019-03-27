@@ -4,19 +4,17 @@ require('./db/user.schema')
 const db = mongoose.model('User');
 
 class User {
+
     constructor(props) {
-        this.username = props.username || props.id || props._id || shortid.generate();
+        this.id = props.id || props._id || shortid.generate();
+        this.username = props.username;
         this.name = props.name || null;
         this.email = props.email || null;
         this.stacks = props.stacks || [];
     }
 }
 
-function all() {
-    return find();
-}
-
-function find(query) {
+function find(query = {}) {
     let q = {};
     if (query.username) q._id = query.username;
     if (query.name) q.name = query.name;
@@ -25,8 +23,7 @@ function find(query) {
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                if (!res || res.length === 0) return resolve(undefined);
-                if (res.length === 1) return resolve(new User(res[0]));
+                if (!res || res.length === 0) return resolve([]);
                 return resolve(res.map(doc => new User(doc)));
             });
     });
@@ -58,7 +55,6 @@ function remove(username) {
 
 module.exports = {
     User,
-    all,
     find,
     merge,
     remove

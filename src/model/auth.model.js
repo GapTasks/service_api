@@ -18,7 +18,7 @@ AuthInfo.Algorithm = {
     SHA256: 'sha256'
 };
 
-function find(query) {
+function find(query = {}) {
     let q = {};
     if (query.id) q._id = query.id;
     if (query.user) q.user = query.user;
@@ -28,10 +28,7 @@ function find(query) {
             .exec((err, docs) => {
                 if (err) return reject(new Error('Failed to retrieve authentication info: ' + err.message));
                 if (!docs || docs.length == 0) {
-                    return resolve(undefined);
-                }
-                if (docs.length == 1) {
-                    return resolve(new AuthInfo(docs[0]));
+                    return resolve([]);
                 }
                 return resolve(docs.map(doc => new AuthInfo(doc)));
             });

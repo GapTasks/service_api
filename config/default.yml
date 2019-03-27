@@ -22,3 +22,7 @@ security:
         issuer: gaptasks.com
         secretKey: /etc/secrets/private.key
 
+chatkit:
+    instanceLocator: "v1:us1:4eb3c1bc-724a-48f8-9d96-8a5f58b9da94"
+    key: "33486da8-cecd-494a-8b0a-65f966705fc8:9wiZSYbOoybMwNw66ufbcRzUk1dFqMbQWtDI4qp3P/k="
+

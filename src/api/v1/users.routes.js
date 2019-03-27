@@ -9,4 +9,5 @@ usersRouter.get('/users/:id', passport.authenticate('jwt', { session: false }), 
 usersRouter.patch('/users/:id', passport.authenticate('jwt', { session: false }), handlers.updateUser);
 usersRouter.delete('/users/:id', passport.authenticate('jwt', { session: false }), handlers.deleteUser);
 
+
 module.exports = usersRouter;

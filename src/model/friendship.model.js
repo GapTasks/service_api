@@ -1,19 +1,19 @@
 const shortid = require('shortid');
 const mongoose = require('mongoose');
-require('./db/stack.schema');
-const db = mongoose.model('Stack');
+require('./db/friendship.schema.js');
+const db = mongoose.model('Friendship');
 
-class Stack {
+class Friendship {
     constructor(props, allowId = true) {
         if (allowId) {
             this.id = props.id || props._id || shortid.generate();
         } else {
             this.id = shortid.generate();
         }
-        this.name = props.name || null;
-        this.deadline = props.deadline || Date.now();
-        this.priority = props.priority || 0;
-        this.user = props.user;
+        this.friend1 = props.friend1 || null;
+        this.friend2 = props.friend2 || null;
+        this.status = props.status || null;
+        this.initiator = props.initiator || null;
     }
 }
 
@@ -27,19 +27,19 @@ function find(query = {}) {
             .exec((err, res) => {
                 if (err) return reject(err);
                 if (!res) return resolve([]);
-                return resolve(res.map(doc => new Stack(doc)));
+                return resolve(res.map(doc => new Friendship(doc)));
             });
     });
 }
 
-function merge(stack) {
+function merge(friendship) {
     return new Promise((resolve, reject) => {
-        if (!stack.id) reject(new Error('Cannot merge stack without an ID'));
-        db.findOneAndUpdate({ _id: stack.id }, stack, { new: true, upsert: true })
+        if (!friendship.id) reject(new Error('Cannot merge friendship without an ID'));
+        db.findOneAndUpdate({ _id: friendship.id }, friendship, { new: true, upsert: true })
             .lean()
             .exec((err, res) => {
                 if (err) return reject(err);
-                return resolve(new Stack(res));
+                return resolve(new Friendship(res));
             });
     });
 }
@@ -51,14 +51,14 @@ function remove(id) {
             .exec((err, res) => {
                 if (err) return reject(err);
                 if (!res) return resolve(undefined);
-                return resolve(new Stack(res));
+                return resolve(new Friendship(res));
             });
     });
 }
 
 module.exports = {
-    Stack,
+    Friendship,
     find,
     merge,
     remove
-};
+}

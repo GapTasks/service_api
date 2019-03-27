@@ -1,16 +1,20 @@
 const stacks = require('../../model/stack.model');
+const tasks = require('../../model/task.model');
+const taskHandler = require('./tasks.handlers');
 const logger = require('winstonson')(module);
 const response = require('./response');
 const httpStatus = require('http-status');
+const chatkit = require('../../util/chatkit');
 
 module.exports = {
     addStack,
     getStack,
+    getAllStacks,
     updateStack,
     deleteStack
 };
 
-function generateRestRsponse(stack) {
+function generateRestResponse(stack) {
     let self = '/stacks/' + stack.id;
     return {
         ...stack,
@@ -22,10 +26,15 @@ function generateRestRsponse(stack) {
 
 async function addStack(req, res) {
     try {
-        let newStack = new stacks.Stack(req.body, false);
+        const {name, time_needed, mood} = req.body.payload;
+        let newStack = new stacks.Stack({name, user: req.user.sub}, false);
         await stacks.merge(newStack);
-        let resBody = generateRestRsponse(newStack);
-        return response.sendOkResponse(res, httpStatus.CREATED, 'Successfully added new stack', resBody);
+        let newTask = new tasks.Task({ name, time_needed, mood, stack: newStack.id }, false);
+        const result = await chatkit.createRoom({userId: req.user.sub, taskId: newTask.id, customData: null});
+        newTask.chatRoomId = result.id;
+        await tasks.merge(newTask);
+        let resBody = generateRestResponse({ ...newStack, ...newTask });
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully created stack', resBody);
     } catch (err) {
         logger.error(err);
         response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create stack');
@@ -34,8 +43,12 @@ async function addStack(req, res) {
 
 async function getStack(req, res) {
     try {
-        let stack = await stacks.find({ id: req.params.id });
-        let resBody = generateRestRsponse(stack);
+        let stacksArray = await stacks.find({ id: requestedID });
+        if (stacksArray.length === 0) {
+            return response.sendErrorResponse(res, httpStatus.NOT_FOUND, 'Failed to find stack');
+        }
+        let stack = stacksArray[0];
+        let resBody = generateRestResponse(stack);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stack', resBody);
     } catch (err) {
         logger.error(err);
@@ -43,11 +56,35 @@ async function getStack(req, res) {
     }
 }
 
+async function stacksMap(s) {
+    let _tasks = await tasks.find({});
+    _tasks = _tasks.filter((e, _)=>e.stack == s.id);
+    console.log(_tasks);
+    return { ...s, tasks: _tasks };
+}
+
+async function getAllStacks(req, res){
+    try{
+        let targetUser = req.query.owner ? req.query.owner : req.user.sub;
+        let allStacks = await stacks.find({user: targetUser});
+        if(allStacks.id) {
+            allStacks = [allStacks];
+        }
+        let stacksArr = allStacks.map(stacksMap);
+        let stacksResult = await Promise.all(stacksArr);
+        let resBody = stacksResult.map(s => generateRestResponse(s));
+        return response.sendOkResponse(res, httpStatus.OK, 'Successfully retrieved stacks', resBody);
+    } catch (err) {
+        logger.error(err);
+        return response.sendErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get stacks');
+    }
+}
+
 async function updateStack(req, res) {
     try {
         req.body.id = req.params.id;
         let stack = await stacks.merge(req.body);
-        let resBody = generateRestRsponse(stack);
+        let resBody = generateRestResponse(stack);
         return response.sendOkResponse(res, httpStatus.OK, 'Successfully updated stack', resBody);
     } catch (err) {
         logger.error(err);
